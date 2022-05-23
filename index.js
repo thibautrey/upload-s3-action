@@ -33,7 +33,7 @@ const paths = klawSync(SOURCE_DIR, {
 
 function upload(params) {
   return new Promise(resolve => {
-    s3.upload(params, (err, data) => {
+    s3.upload({ signatureVersion: 'v4', ...params }, (err, data) => {
       if (err) core.error(err);
       core.info(`uploaded - ${data.Key}`);
       core.info(`located - ${data.Location}`);
@@ -47,7 +47,10 @@ function run() {
   return Promise.all(
     paths.map(p => {
       const fileStream = fs.createReadStream(p.path);
-      const bucketPath = path.join(destinationDir, path.relative(sourceDir, p.path));
+      const bucketPath = path.join(
+        destinationDir,
+        path.relative(sourceDir, p.path)
+      );
       const params = {
         Bucket: BUCKET,
         ACL: 'public-read',
